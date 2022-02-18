@@ -1,0 +1,218 @@
+
+ <!-- Content Header (Page header) -->
+ <div ng-controller="ReadyToPickupController as readytopickup">
+
+ <div>
+    <style type="text/css">
+    	.cancel_btn{
+    	  background: black;
+		  color: white;
+		  font-weight: 700;
+		  padding: 10px 20px;
+		  font-size: 15px;
+		  border-radius: 10px;
+    	}
+    </style>
+ </div>
+    <section class="content-header">
+      <h1>
+        PickUp Order
+        <small>PickUp Order</small>
+      </h1>
+      <ol class="breadcrumb">
+        <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
+        <li class="active">Here</li>
+      </ol>
+    </section>
+
+
+<audio id="myAudio">
+  <!-- <source src="https://www.w3schools.com/jsref/horse.ogg" type="audio/ogg"> -->
+  <source src="http://www.schillmania.com/projects/soundmanager2/demo/mpc/audio/CHINA_1.mp3" type="audio/mpeg">
+</audio>
+    
+
+    <!-- Main content -->
+     <section class="content">
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title">PickUp Orders List</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <span ng-if="copy_items.length==0">No Data Found</span>
+              <div id="ordertbl" class="table table-bordered table-hover" ng-if="copy_items.length!=0">
+              	<div ng-repeat="order in copy_items | limitTo:limit" ng-if="order.isCanceled != 1 && chkShow(order)" style="border:1px solid black">
+                 <div style="background:#ccc;padding:5px">
+                 	<div style="font-weight: bold;text-align:left;">
+                    <p> ORDER ID: <span style="color:#66c60a">{{order.invNo}}</span> </p>
+                    <p> <span> ORDER DATE: </span> <span style="color:#66c60a"> {{order.invDate.split(' ')[0] | date : "dd-MM-yyyy"}} </span> </p>
+                  </div>  
+                 </div>
+                <div ng-repeat="orderdetails in order.orderDetails" ng-if="orderdetails.status==2 && orderdetails.deliveryAgentId != 0 && orderdetails.deliveryAgentId == deliverpersonid" style="padding: 0px 10px">
+                  <p> <span> <b> Item Name : </b> </span> <span>{{orderdetails.itemName}} </span></p>
+                  <p> <span> <b> Order Oty : </b> </span> <span> {{orderdetails.packQty}} </span> </p>
+                  <p> <span> <b> Order Amount : </b> </span> <span> {{orderdetails.netAmount}} </span> </p>
+                  <p> <span> <b> Pickup Date : </b> </span> <span> {{orderdetails.pickupDate}} </span> </p>
+                  <p> <span> <b> Pickup Time : </b> </span> <span> {{orderdetails.pickupTime}} </span> </p>
+                  <p> <span> <b> Delivery Type : </b> </span> <span> {{orderdetails.deliveryType}} </span> </p>
+                  <p> <span> <b> Store Name : </b> </span> <span> {{orderdetails.store.name}} </span> </p>
+                  <p> <span> <b> Store Address : </b> </span> <span> {{orderdetails.store.address + ", " +orderdetails.store.postcode}} </span> </p>
+                  <p> <span> <b> Store Phhoneno : </b> </span> <span> {{orderdetails.store.phone}} </span> </p>
+                  
+                  <p style="text-align:center;">
+                  <button class="btn single_accept_btn" ng-click="pickupOrder(orderdetails.id, order)"> Pick Up </button>  
+                 </p>
+                 <hr style="border-top:3px solid black">
+                 </div>
+                </div>
+              </div>
+            </div>
+            </div>
+
+
+            <!-- ........... Pagination Part .............. -->
+
+              <div ng-if="orders.length != 0" style="text-align:right;margin-top:20px">
+                <nav aria-label="Page navigation" align="left" style="display:inline-block;margin-right:10px">
+                    <ul class="pagination">
+                        <li ng-class="{disabled:!navigators.prev.state}">
+                            <a aria-label="Previous" ng-click="prev()" >
+                              <span aria-hidden="true">«</span>
+                            </a>
+                        </li>
+                        <li ng-repeat="page in pages" ng-class="{active:page.active}" ng-disabled="page.active">
+                            <a  ng-click="setPageActive(page.page)" >{{page.page}}</a>
+                        </li>
+                        <li ng-class="{disabled:!navigators.next.state}">
+                            <a aria-label="Next" ng-click="next()">
+                            <span aria-hidden="true">»</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+              </div>
+
+             <!-- ........... Pagination Part End .............. -->
+
+
+
+          </div>
+          <!-- /.box -->
+
+          
+        </div>
+        <!-- /.col -->
+      </div>
+      <!-- /.row -->
+    </section>
+    <!-- /.content -->
+
+
+
+ <div class="modal fade" id="store_details_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
+      <div class="modal-dialog modal-lg">
+         <!-- Modal content-->
+         <div class="modal-content" style="padding:10px 20px">
+            <!-- <div class="modal-header">
+            </div> <br> -->
+            <div class="modal-body" style="padding-top:30px;height:500px;overflow:scroll">
+              <h5 style="color:#292929;font-family:'Poppins', sans-serif;font-size:25px;font-weight:600"> STORE DETAILS </h5>
+              <div style="margin-top:20px">
+                <div style="padding:10px 30px">
+                <table>
+                  <tr ng-repeat="s in allStores">
+                       <td> {{s.id}} </td>
+                  </tr>
+                </table>
+                  <table style="width:100%" id="show_store_table" >
+                    
+                   
+                  </table>
+                </div> 
+              </div>   
+            </div>
+            <p style="text-align: center">
+            <button type="button"  class="btn btn-default btn-sm cancel_btn" data-dismiss="modal">CANCEL</button>
+            </p>
+         </div>
+         </div>
+         
+      </div>    
+
+ 
+<div class="modal fade" id="assignmodal" tabindex="-1" role="dialog" aria-labelledby=""   aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Assign Store</h4>
+            </div>
+
+            <div class="modal-body">
+               <div id="map" style="height: 500px; weight: 500px;"></div>
+               <div id="infowindow-content">
+                   <img src="" width="16" height="16" id="place-icon">
+                   <span id="place-name"  class="title"></span><br>
+                   <span id="place-address"></span>
+             </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger btn-default" data-dismiss="modal">Cancel</button>
+                <!-- <a class="btn btn-danger btn-ok">OK</a> -->
+            </div>
+        </div>
+    </div>
+ </div>
+
+
+<div class="modal fade" id="alert_pincode_modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true"> 
+      <div class="modal-dialog modal-sm">
+         <!-- Modal content-->
+         <div class="modal-content" style="">
+            <!-- <div class="modal-header">
+            </div> <br> -->
+            <div class="modal-body" style="padding-top:15px;">
+              <h5 style="color:red;font-family:'Poppins', sans-serif;font-size:20px;font-weight:500;text-align:center"> This Pincode is not assigned for you. </h5>  
+            </div>
+            <div class="modal-footer" style="padding-bottom:30px;margin-top:10px;text-align:center"> 
+            <button type="button"  class="btn btn-default btn-sm" data-dismiss="modal" style="background:black;color:white;padding:5px 10px;font-size:17px">OK</button>  
+         </div>
+         </div>
+         
+      </div>    
+</div>
+
+  
+    
+    <script>
+    $(function () {
+     /*$("header, footer ,aside").hide();*/
+      $("#div2").addClass("content-wrapper");
+      $("#ready_to_pickup_li").addClass("active");
+     /* $('#ordertbl').DataTable()*/
+        
+       });
+    function myFunction(store_id)
+      {
+      	//alert(store_id);
+        var orderdetailsid = localStorage.getItem("orderDetails_id");
+        var deliveryPersonData = JSON.parse(localStorage.getItem("deliveryPersonData"));
+        //console.log("deliveryPersonData"+ JSON.stringify(deliveryPersonData));
+        for(var i=0;i<deliveryPersonData.length;i++){
+            if(deliveryPersonData[i].id==store_id){
+                $("#deliverypesronname_"+orderdetailsid).val(deliveryPersonData[i].fname+' '+deliveryPersonData[i].lname);
+                $("#deliverypesronid_"+orderdetailsid).val(deliveryPersonData[i].id);
+                $("#storeid_"+orderdetailsid).val(store_id);
+            }
+        }
+            $("#deliveryPersonAssign_"+orderdetailsid).prop('disabled', false);
+            $('#store_details_modal').modal('hide');
+        }
+
+    /*$(document).ready(function(e) { initMap(); });*/
+    </script>
+    
